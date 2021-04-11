@@ -4,6 +4,8 @@ var TILESIZE = 1;
 // ringe video med flere fejl:
 // https://www.youtube.com/watch?v=6oFvqLfRnsU&t=1015s
 
+// controls: https://www.html5rocks.com/en/tutorials/pointerlock/intro/
+
 class Level{
 	constructor(){}
 	map_width = 16;

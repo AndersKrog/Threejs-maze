@@ -1,139 +1,71 @@
 
-var TILESIZE = 1;
+import Visitor from './visitor.js';
+import Level from './level.js';
+import InputHandler from './inputhandler.js';
 
-// ringe video med flere fejl:
-// https://www.youtube.com/watch?v=6oFvqLfRnsU&t=1015s
-
-// controls: https://www.html5rocks.com/en/tutorials/pointerlock/intro/
-
-class Level{
-	constructor(){}
-	map_width = 16;
-	map_height = 12;
-
-	grid = [
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-		[1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1],
-		[1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1],
-		[1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1],
-		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-		[1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1],
-		[1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1],
-		[1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-		[1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-		];
-	hasWallAt(x,z){
-		if (x < 0 || x > this.map_width || z < 0 || z > this.map_height){
-			return true;
-		}
-		var mapGridIndexX = Math.floor(x/TILESIZE);
-		var mapGridIndexZ = Math.floor(z/TILESIZE);
-		
-		return this.grid[mapGridIndexZ][mapGridIndexX];
-	}
-
-}
-
-
-class Player{
-	constructor(){
-	this.pos = new THREE.Vector3(2,0,2);
-	this.rotationAngle = 0;
-	this.moveSpeed = 0.1;
-	this.turnDirection = 0;	//-1:left, 1:right
-	this.rotationSpeed = 3 * (Math.PI/180);	//degrees per frame
-	this.walkDirection = 0;	//-1:backwards, 1:forwards
-	}		
-	update(){
-		
-		this.rotationAngle += this.turnDirection * this.rotationSpeed;
-
-		let moveStep = this.walkDirection * this.moveSpeed;
-
-
-		// det skyldes måske akserne
-		// akserne er byttet om i forhold til tidliger kodeeksmpelr, dvs
-		// også sige cos og sin er byttet og turnDirection er vendt om
-		var newX = this.pos.x + Math.sin(this.rotationAngle) * moveStep;
-		let newZ = this.pos.z + Math.cos(this.rotationAngle) * moveStep;
-
-		// der er noget her der skal vendes rigtigt, eller stemme overens med når klodserne pladseres
-		if (level.hasWallAt(newX,newZ) == 0 ){	
-		this.pos.z = newZ;
-		this.pos.x = newX;
-		}
-
-		this.pos.z = newZ;
-		this.pos.x = newX;
-
-		
-
-		camera.rotation.y = this.rotationAngle;
-
-		camera.position.z = this.pos.z;
-		camera.position.x = this.pos.x;
-
-	}
-}
-
-class InputHandler{
-	constructor(player){
-		// der bør laves noget her, så inputhandleren hæftes på det objekt som det styrer
-		// er ikke sikker på dette er den korrekte måde 
-		this.player = player;
-
-	document.addEventListener("keydown", event => {
-		if (event.keyCode == 37)
-			player.turnDirection = 1;
-		if (event.keyCode == 39)
-			player.turnDirection = -1;
-		if (event.keyCode == 38)
-			player.walkDirection = -1;
-		if (event.keyCode == 40)
-			player.walkDirection = 1;
-	});
-			
-	document.addEventListener("keyup", event => {
-		if (event.keyCode == 37)
-			player.turnDirection = 0;
-		if (event.keyCode == 39)
-			player.turnDirection = 0;
-		if (event.keyCode == 38)
-			player.walkDirection = 0;
-		if (event.keyCode == 40)
-			player.walkDirection = 0;
-	});	
-
-	}
-
-}
-
-player = new Player();
-
-inputHandler = new InputHandler(player);
-
-level = new Level();
-
+var level = new Level();
 var scene = new THREE.Scene();
+var visitor = new Visitor(scene);
+var camera_FP;
+var inputHandler = new InputHandler(visitor,camera_FP);
 
-var camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+level.generate(scene);
 
-var renderer = new THREE.WebGLRenderer({antialias: true});
+/*
+Kamera:
+Det er muligt at lave et ArrayCamera, hvis man ønsker at bruge flere kameraer på en gang:
+https://threejs.org/docs/#api/en/cameras/ArrayCamera
+https://github.com/mrdoob/three.js/blob/master/examples/webgl_camera_array.html
+*/
 
+camera_FP = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+
+let mapScale = 150;
+var camera_Top = new THREE.OrthographicCamera(window.innerWidth/ -mapScale,window.innerWidth/ mapScale, window.innerHeight/mapScale, window.innerHeight/-mapScale, 1,1000);
+
+camera_Top.position.y = 10;
+camera_Top.position.z = level.map_height/2;
+camera_Top.position.x = level.map_width/2;
+camera_Top.rotation.x = -Math.PI/2;
+
+var cameras = [];
+// test
+	const AMOUNT = 4;
+	const ASPECT_RATIO = window.innerWidth / window.innerHeight;
+	const WIDTH = ( window.innerWidth / AMOUNT ) * window.devicePixelRatio;
+	const HEIGHT = ( window.innerHeight / AMOUNT ) * window.devicePixelRatio;
+	for ( let y = 0; y < AMOUNT; y ++ ) {
+		for ( let x = 0; x < AMOUNT; x ++ ) {
+			const subcamera = new THREE.PerspectiveCamera( 75, ASPECT_RATIO, 0.1, 1000 );
+			subcamera.viewport = new THREE.Vector4( Math.floor( x * WIDTH ), Math.floor( y * HEIGHT ), Math.ceil( WIDTH ), Math.ceil( HEIGHT ) );
+			//subcamera.position.x = 0.5;
+			//subcamera.position.y = 0.5;
+			//subcamera.position.z = 2.5;
+			//subcamera.position.multiplyScalar( 2 );
+			//subcamera.lookAt( 0, 0, 0 );
+			subcamera.updateMatrixWorld();
+			cameras.push(subcamera);
+		}
+	}
+// test
+
+var camera = new THREE.ArrayCamera(cameras);
+
+var renderer = new THREE.WebGLRenderer({ canvas: canvasGL, antialias: true});
+var canvas = document.getElementById("canvasGL");
 renderer.setClearColor("#e5e5e5");
-renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setSize(window.innerWidth/2,window.innerHeight/2);
 
 document.body.appendChild(renderer.domElement);
 
-
+var renderer2 = new THREE.WebGLRenderer({ canvas: canvasGL2, antialias: true});
+var canvas2 = document.getElementById("canvasGL2");
+renderer2.setClearColor("#e5e5e5");
+renderer2.setSize(window.innerWidth/2,window.innerHeight/2);
 
 // for at få skærmen til at opdatere canvas når vinduet størrelse ændres
 // der er en fejl!!
-
-
+/*
 window.addEventListener('resize', () => {
 	renderer.setSize(window.innerWidth,window.innerHeight);
 	camera.aspect = window.innerWidth/window.innerHeight;
@@ -141,80 +73,39 @@ window.addEventListener('resize', () => {
 	camera.updateProjectionMatrix();
 
 });
+*/
 
-// lav 3d figur:
-var geometry1 = new THREE.DodecahedronGeometry(.25,1);
-//var material1 = new THREE.MeshLambertMaterial({color: 0xFF2222});
-var material1 = new THREE.MeshNormalMaterial({color: 0xFF2222});
+// pointer lock API
+//https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
 
+canvas.requestPointerLock = canvas.requestPointerLock ||
+                            canvas.mozRequestPointerLock;
 
-var mesh1 = new THREE.Mesh(geometry1,material1);
+document.exitPointerLock = document.exitPointerLock ||
+                           document.mozExitPointerLock;
 
-scene.add(mesh1);
-
-
-for (let x = 0; x < level.map_width; x++){
-	for (let y = 0; y < level.map_height; y++){
-		if (level.grid[y][x] != 0){
-			var geometry = new THREE.BoxGeometry(1,1,1);
-			var material = new THREE.MeshLambertMaterial({color: 0xFFCC00});
-			var mesh = new THREE.Mesh(geometry,material);
-			mesh.position.x = x; 
-			mesh.position.y = 0;
-			mesh.position.z = y;
-			scene.add(mesh);
-			
-			}
-		}
-	}
-
-// floor
-var geometryf = new THREE.BoxGeometry(level.map_width,1,level.map_height);
-var materialf = new THREE.MeshLambertMaterial({color: 0x00CC00});
-var meshf = new THREE.Mesh(geometryf,materialf);
-meshf.position.x = +level.map_width/2; 
-meshf.position.y = -1;
-meshf.position.z = +level.map_height/2;
-scene.add(meshf);
-
-// and roof
-
-var geometryr = new THREE.BoxGeometry(level.map_width,1,level.map_height);
-var materialr = new THREE.MeshLambertMaterial({color: 0xCCCC00});
-var meshr = new THREE.Mesh(geometryr,materialr);
-meshr.position.x = +level.map_width/2; 
-meshr.position.y = 1;
-meshr.position.z = +level.map_height/2;
-scene.add(meshr);
+canvas.onclick = function() {
+  canvas.requestPointerLock();
+  // skal eventuelt slås fra, hvis musen ikke er fanget
 
 
+	/*
+	//document.addEventListener("mousemove", function () {visitor.updatePosition(e,camera_FP)}, true);
+	hvis man skal passe et argument sammen med eventet kan det gøres således:
+	*/
+	document.addEventListener("mousemove", (e) => {visitor.updatePosition(e,camera_FP)}, true);
+};
 
-
-var light = new THREE.PointLight(0xFFFFFF,1,500);
-light.position.set(10,0,25);
-
-var light1 = new THREE.PointLight(0xF00FFF,1,300);
-light.position.set(10,5,25);
-
-
-scene.add(light);
-
-scene.add(light1);
-
+// dette skal struktureres på en anden måde bør kædes sammen med inputhandler klassen
 
 // gameloop
-var render = function(){
+function render(){
 	requestAnimationFrame(render);
 	
-	player.update();
-	
-	mesh1.position.z = 5;
-	mesh1.position.x = 8;
-	mesh1.rotation.x += 0.01;
-	mesh1.rotation.z += 0.01;
+	visitor.update(level,camera_FP,camera);
 
-	
-	renderer.render(scene,camera);
+	renderer.render(scene,camera_FP);
+	renderer2.render(scene,camera_Top);
 }
 
 render();

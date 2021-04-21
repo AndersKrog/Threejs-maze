@@ -88,7 +88,7 @@ export default class Level{
 	this.grid_floor1 = [
 	//	 1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 
 
-		[1, 1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 2, 2, 2, 2, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 		[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -126,6 +126,9 @@ export default class Level{
 		];
     }
 	hasWallAt(x,z){
+		
+		// der skal tages højde for hvilken etage man er på
+		
 		if (x < 0 || x > this.map_width || z < 0 || z > this.map_height){
 			return true;
 		}
@@ -222,14 +225,14 @@ export default class Level{
 
 		// grass
 	
-		var geometryg = new THREE.PlaneBufferGeometry(this.map_width,this.map_height,32,32);			//(this.map_width,1,this.map_height);
-		var materialg = new THREE.MeshStandardMaterial({color: 0x0044EE, map: heightMap, displacementMap: heightMap,displacementScale: 0.5});
+		var geometryg = new THREE.PlaneBufferGeometry(this.map_width*2,this.map_height*2,32,32);			//(this.map_width,1,this.map_height);
+		var materialg = new THREE.MeshStandardMaterial({color: 0x00DD44, map: heightMap, displacementMap: heightMap,displacementScale: 2});
 		var meshg = new THREE.Mesh(geometryg,materialg);
 		meshg.rotation.x = -Math.PI/2;
 		meshg.position.x = this.TILESIZE * this.map_width/2; 
-		meshg.position.y = -0.5;
+		meshg.position.y = -4;
 		meshg.position.z = this.TILESIZE *  this.map_height/2;
-		//scene.add(meshg);
+		scene.add(meshg);
 
 		// ceiling
 		var geometryr = new THREE.BoxGeometry(this.map_width*this.TILESIZE,0.5,this.map_height*this.TILESIZE);
@@ -263,12 +266,12 @@ export default class Level{
 
         modelLoader.load('./assets/testfigur.gltf', function(gltf) {
             Mesh = gltf.scene;
-            Mesh.scale.set(0.2,0.2,0.2);
+            Mesh.scale.set(3.5,3.5,3.5);
             scene.add(Mesh);
-            Mesh.position.x = 4;
-            Mesh.position.y = 0;
-            Mesh.position.z = 3;
+            Mesh.position.x = 5;
+            Mesh.position.y = -2.5;
+            Mesh.position.z = -10;
         });
-	
+			
 	}
 }

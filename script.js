@@ -91,6 +91,16 @@ testModel.position.z = 3;
 scene.add(testModel);
 
 
+const loader = new THREE.TextureLoader();
+const bg = loader.load(
+	'assets/tears_of_steel_bridge.jpg',
+	() => {
+	const rt = new THREE.WebGLCubeRenderTarget(bg.image.height);
+	rt.fromEquirectangularTexture(renderer,bg);
+	scene.background = rt.texture;
+	});
+
+
 time.start();
 // gameloop
 function loop(){

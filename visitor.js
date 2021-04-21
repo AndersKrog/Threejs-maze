@@ -5,7 +5,7 @@ export default class Visitor{
 		
 		this.body.position.x = 5;
 		this.body.position.y = 0.25;
-		this.body.position.z = 1.5;
+		this.body.position.z = 0.5;
 		this.body.rotation.y = -Math.PI/2;
 		
 		// midlertidig til test . skift etaga

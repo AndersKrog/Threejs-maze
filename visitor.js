@@ -4,11 +4,17 @@ export default class Visitor{
 		this.body = new THREE.Object3D();
 		
 		this.body.position.x = 5;
-		this.body.position.y = 0;
+		this.body.position.y = 0.25;
 		this.body.position.z = 1.5;
 		this.body.rotation.y = -Math.PI/2;
+		
+		// midlertidig til test . skift etaga
+		this.groundFloor = true;
 	
-		this.moveSpeed = 0.05;
+		this.viewMode = 1;	// Ikke sikkert den skal ligge her
+
+	
+		this.moveSpeed = 0.15;
 		this.rotationSpeed = 3 * (Math.PI/180);	//degrees per frame
 
 		this.turnDirection = 0;	//1:left, -1:right
@@ -19,9 +25,19 @@ export default class Visitor{
 		const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 		this.visitorModel = new THREE.Mesh( geometry, material );
 		this.visitorModel.rotation.x = -Math.PI/2;
-		this.visitorModel.position.y = 0.5;
+		this.visitorModel.position.y = 1;
 		scene.add(this.visitorModel);
-	}	
+	}
+	shiftFloor(){
+		if (this.groundFloor == true){
+			this.groundFloor = false;
+			this.body.position.y = 0.25;
+		} else{
+			this.body.position.y = 3.75;
+			this.groundFloor = true;
+		}
+	}
+	
 	update(level, camera_FP){
 
 		this.body.rotation.y += this.turnDirection * this.rotationSpeed;
@@ -39,6 +55,8 @@ export default class Visitor{
 			this.body.position.z = newZ;
 			this.body.position.x = newX;
 		}
+			this.body.position.z = newZ;
+			this.body.position.x = newX;
 
 		this.visitorModel.position.x = this.body.position.x;
 		this.visitorModel.position.z = this.body.position.z;
@@ -47,6 +65,8 @@ export default class Visitor{
 
 		camera_FP.position.z = this.body.position.z;
 		camera_FP.position.x = this.body.position.x;
+		camera_FP.position.y = this.body.position.y;
+		
 		camera_FP.rotation.y = this.body.rotation.y;
 
 	}

@@ -2,12 +2,17 @@ import Visitor from './visitor.js';
 import Level from './level.js';
 import InputHandler from './inputhandler.js';
 
+
+// framerate
+(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
 let level = new Level();
 let scene = new THREE.Scene();
 let visitor = new Visitor(scene);
 let inputHandler = new InputHandler(visitor);
 
 let time = new THREE.Clock();
+
 
 level.generate(scene);
 
@@ -20,17 +25,17 @@ https://github.com/mrdoob/three.js/blob/master/examples/webgl_camera_array.html
 
 let camera_FP = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
 
-let mapScale = 150;
+let mapScale = 75;
 let camera_Top = new THREE.OrthographicCamera(window.innerWidth/ -mapScale,window.innerWidth/ mapScale, window.innerHeight/mapScale,window.innerHeight/-mapScale, 1,1000);
 
-camera_Top.position.y = 10;
-camera_Top.position.z = level.map_height/2;
-camera_Top.position.x = level.map_width/2 +4.6;
+camera_Top.position.y = 500;
+camera_Top.position.z = level.TILESIZE * level.map_height/2;
+camera_Top.position.x = level.TILESIZE * level.map_width/2 +4.6;
 camera_Top.rotation.x = -Math.PI/2;
 
 let renderer = new THREE.WebGLRenderer({ canvas: canvasGL, antialias: true});
 let canvas = document.getElementById("canvasGL");
-renderer.setClearColor(0xe5e5e5);
+renderer.setClearColor(0x53B3FF);
 renderer.setSize(window.innerWidth,window.innerHeight);
 
 document.body.appendChild(renderer.domElement);
@@ -95,8 +100,14 @@ function loop(){
 	//console.log(time.getElapsedTime ());
 
 	visitor.update(level,camera_FP);
-	renderer.render(scene,camera_FP);
-	renderer2.render(scene,camera_Top);
+	
+	if (visitor.viewMode == 1) {
+		renderer.render(scene,camera_FP);
+		renderer2.render(scene,camera_Top);
+	} else {
+		renderer.render(scene,camera_Top);
+		renderer2.render(scene,camera_FP);		
+	}
 
 }
 

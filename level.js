@@ -4,115 +4,42 @@ export default class Level{
 		this.map_width = 85;
 		this.map_height = 28;
 		this.grid_floor0;
+		this.floor0_walls = new THREE.Group();
 		this.grid_floor1;
-	
-		this.grid_floor0_txt = [
-	//	 0         10		 20        30        40        50        60        70        80        90        100
-	//   |         |         |         |         |         |         |         |         |         |         |
-		"11111111111111111111111111111111111111111111111111111111111111111111111          1111",
-		"1         1          1   1   1   1                          1      1                1",
-		"1         1          1   1   1   1          1               1      1                1",
-		"1         1          1   1   1   1                          1      1       L        1",
-		"1         1          1   1   1   1          1               1      1                1",
-		"1    L    1     L    1   1   1   1                          1      1                1",
-		"1         1          1   1   1   1          1               1      1                1",
-		"1         1          1   1   1   1                          1      1                1",
-		"1         1          1   1   1   1          1               1      1       L        1",
-		"1         1          1   1   1   1                          1      1                1",
-		"111111  11111111  11111  1  11  111111  1111111111  1111111111  1111                1",
-		"1                                                                  1                1",
-		"1                                                                  1                1",
-		"     L        L       L       L          L          L        L                      1",
-		"                                                                            112221111",
-		"1                                                                  1        1       1",
-		"1                                                                  1        1       1",
-		"111111  11111  1111  111111  1111111111  111111  111111  11111  1111                1",
-		"1          1    1      1       1                   1       1       1                1",
-		"1          1    1      1       1           1       1       1       1        1       1",
-		"1          1    1      1       1                   1       1       1        1       1",
-		"1          1    1      1       1           1       1       1       1        111111111",
-		"1          1    1      1       1                   1       1       11  1    1       1",
-		"1    L     1    1      1       1           1       1       1       11  1            1",
-		"1          1    1      1       1                   1       1       11  1            1",
-		"1          1    1      1       1           1       1       1       11  1            1",
-		"1          1    1      1       1                   1       1       11111    1       1",
-		"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
-		];
-		this.grid_floor1_txt = [
-	//	 0         10		 20        30        40        50        60        70        80        90        100
-	//   |         |         |         |         |         |         |         |         |         |         |
-		"1122221222111122111221112211111111111111111111111111111111111111111111111111111111111",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        1    1           1",
-		"1          1     1    1    1    1    1          1         1        11  11  1111111111",
-		"1          111  11  111  111  111  1111111  111111111  1111111  1111                1",
-		"1          1                                                       1                1",
-		"1          1                                                       1         1      1",
-		"                                                                           1111111111",
-		"                                                                           1        1",
-		"1          1                                                       1                1",
-		"1          1                                                       1                1",
-		"1          1111111  11111111111111111111  111111111111111  111111  1       1        1",
-		"1          1                                         1        1    1       1111111111",
-		"1          1                 1                       1        1    1       1        1",
-		"1          1                                         1        1    1       1        1",
-		"1          1                 1                       1        1    11  1   1        1",
-		"1          1                                         1        1    11  1            1",
-		"1          1                 1                       1        111  11  1            1",
-		"1          1                                         1        1    11  1   1        1",
-		"1          1                 1                       1        1    11  1   1        1",
-		"1          1                                         1        1    11  1   1        1",
-		"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
-	];
-		
-	this.grid_floor0 = this.txt_to_array(this.grid_floor0_txt);
-	this.grid_floor1 = this.txt_to_array(this.grid_floor1_txt);	
-
     }
 	
 	load_txt_file(htmltag,file_name){
-		var req=new XMLHttpRequest();
-		req.onreadystatechange=function() {
-			if (req.readyState==4 && req.status==200) {
-				// problem med asynkron læsning
-				// men kan skrives til html som en simpel løsning;
-				document.getElementById(htmltag).innerHTML=req.responseText;
-			}
+		// indlæser data fra txt.fil og returnerer et 2dimensionelt array med de enkelte karakterer
+		var request = new XMLHttpRequest();
+		request.open('GET', file_name, false);  // 'false' gør kaldet synkront
+		request.send(null);
+
+		let txt;
+
+		if (request.status === 200) {
+			txt = request.responseText;
 		}
-		req.open("GET",file_name,true);
-		req.send();
-	}
-
-	txt_to_array2(htmltag){
-		var txt = document.getElementById(htmltag).innerHTML;
-		console.log(txt);
-	}
-
-	
-	txt_to_array(txt_arr){
+				
+		var txtar = txt.split("\n");
+		
+		let array_tmp = [];
+		
 		// tager et array af strings og returnerer et 2dimensionelt array af enkelte tegn
-		var array_tmp = [];
-			for (var row = 0; row < txt_arr.length; row++){
+			for (var row = 0; row < txtar.length; row++){
 				// array til hver række
 				var rowar = [];
-				for (var column = 0; column < txt_arr[row].length; column++){
-					var item = txt_arr[row].slice(column,column+1);
+				for (var column = 0; column < txtar[row].length; column++){
+					var item = txtar[row].slice(column,column+1);
 					rowar.push(item);
 				}
 			array_tmp.push(rowar);
-		}
-	return array_tmp;
+			}
+
+		return array_tmp;
 	}
-	
 	hasWallAt(x,z){
-		
-		// der skal tages højde for, hvilken etage man er på
+		// virker ikke pt.
+		// der skal tages højde for, hvilken etage man er på. og hvad man kan gå igennem
 		if (x < 0 || x > this.map_width || z < 0 || z > this.map_height){
 			return true;
 		}
@@ -142,6 +69,7 @@ export default class Level{
 					mesh.position.x = column*this.TILESIZE + 0.5*this.TILESIZE; 
 					mesh.position.y = floor_number*3.5;
 					mesh.position.z = row*this.TILESIZE + 0.5*this.TILESIZE;
+					this.floor0_walls.add(mesh);
 					scene.add(mesh);
 					break;
 				case "2":
@@ -165,11 +93,12 @@ export default class Level{
 					break;
 				case "L":
 					var light3 = new THREE.PointLight(0xFFFFDD,1,8,2);
-					light3.position.set(column*this.TILESIZE + 0.5*this.TILESIZE, floor_number*this.TILESIZE*7 -1.5*this.TILESIZE,row*this.TILESIZE + 0.5*this.TILESIZE);
+					light3.position.set(column*this.TILESIZE, 0.25 + floor_number*this.TILESIZE*7 ,row*this.TILESIZE + 0.5*this.TILESIZE);
 					scene.add(light3);
-					const sphereSize = 1;
+					
 					//helper
 					/*
+					const sphereSize = 1;
 					const pointLightHelper = new THREE.PointLightHelper( light3, sphereSize );
 					scene.add( pointLightHelper );
 					*/
@@ -181,8 +110,9 @@ export default class Level{
 	
 	generate(scene){
 
-		//test
-		this.load_txt_file("floor0",'assets/floor0.txt');
+		//indlæs levelfiler
+		this.grid_floor0 = this.load_txt_file('floor0','assets/floor0.txt');
+		this.grid_floor1 = this.load_txt_file('floor1','assets/floor1.txt');
 
 		// load textures
 		const loader = new THREE.TextureLoader();
@@ -202,7 +132,7 @@ export default class Level{
 		linoleum.wrapS = THREE.RepeatWrapping;
 		linoleum.wrapT = THREE.RepeatWrapping;
 		linoleum.repeat.set(30,30);
-		var materialf = new THREE.MeshLambertMaterial({map: linoleum});
+		var materialf = new THREE.MeshStandardMaterial({map: linoleum});
 		var meshf = new THREE.Mesh(geometryf,materialf);
 		meshf.position.x = this.TILESIZE * this.map_width/2; 
 		meshf.position.y = -1.5;
@@ -243,40 +173,32 @@ export default class Level{
 		meshr2.position.z = this.TILESIZE * this.map_height/2;
 		scene.add(meshr2);
 
-		var light = new THREE.PointLight(0xFFFFFF,1,500);
-		light.position.set(10,5,25)
-		//scene.add(light);
-
-		var light3 = new THREE.PointLight(0xFFFFFF,1,500);
-		light3.position.set(10,5,-25)
-		//scene.add(light3);
-		
-
 		const alight = new THREE.AmbientLight( 0x404040 ); // soft white light
-		alight.intensity = 0.2;
+		alight.intensity = 0.4;
 		scene.add( alight );
 		
 		let modelLoader = new THREE.GLTFLoader();
 		let Mesh;
 
         modelLoader.load('./assets/testfigur.gltf', function(gltf) {
-            Mesh = gltf.scene;
-            Mesh.scale.set(3.5,3.5,3.5);
-            scene.add(Mesh);
+			Mesh = gltf.scene;
+			Mesh.scale.set(3.5,3.5,3.5);
+			scene.add(Mesh);
             Mesh.position.x = 5;
             Mesh.position.y = -2.5;
             Mesh.position.z = -10;
-        });
-		
-        modelLoader.load('./assets/fire_extinguisher.gltf', function(gltf) {
-            Mesh = gltf.scene;
-            Mesh.scale.set(0.1,0.1,0.1);
-            scene.add(Mesh);
-            Mesh.position.x = 6;
-            Mesh.position.y = -0.75;
-            Mesh.position.z = 5.7;
+			});
+			
+		modelLoader.load('./assets/fire_extinguisher.gltf', function(gltf) {
+			Mesh = gltf.scene.clone();
+			Mesh.scale.set(0.1,0.1,0.1);
+			Mesh.position.x = 6;
+			Mesh.position.y = -0.75;
+			Mesh.position.z = 5.7;
 			Mesh.rotation.y = 1.5* Math.PI;
-        });
+			scene.add(Mesh);
+			});	
+		
         modelLoader.load('./assets/lokum.gltf', function(gltf) {
             Mesh = gltf.scene;
             Mesh.scale.set(0.35,0.35,0.35);
@@ -294,5 +216,6 @@ export default class Level{
             Mesh.position.z = 12;
 			Mesh.rotation.y = Math.PI;
         });
+		
 	}
 }

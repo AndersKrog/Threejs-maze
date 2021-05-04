@@ -1,5 +1,5 @@
 export default class InputHandler{
-	constructor(visitor){
+	constructor(visitor,screen){
 
 		document.addEventListener("keydown", event => {
 			if (event.keyCode == 37)		// ArrowLeft
@@ -11,13 +11,14 @@ export default class InputHandler{
 			if (event.keyCode == 40)		// DownArrow
 				visitor.walkDirection = 1;
 			if (event.keyCode == 86	)			// v
-				if (visitor.viewMode == 1){
-					visitor.viewMode = 2;
+				if (screen.viewMode == 1){
+					screen.viewMode = 0;
 				} else {
-					visitor.viewMode = 1;
+					screen.viewMode = 1;
 				}
 			if (event.keyCode == 70	){		// f
 				visitor.shiftFloor();
+				screen.shiftFloor(visitor.groundFloor);
 			}		
 		});
 			

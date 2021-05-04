@@ -169,8 +169,10 @@ export default class Level{
 					scene.add(light3);
 					const sphereSize = 1;
 					//helper
+					/*
 					const pointLightHelper = new THREE.PointLightHelper( light3, sphereSize );
 					scene.add( pointLightHelper );
+					*/
 					break;
 				}
 			}

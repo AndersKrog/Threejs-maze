@@ -13,7 +13,6 @@ export default class Visitor{
 	
 		this.viewMode = 1;	// Ikke sikkert den skal ligge her
 
-	
 		this.moveSpeed = 0.15;
 		this.rotationSpeed = 3 * (Math.PI/180);	//degrees per frame
 

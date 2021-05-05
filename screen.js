@@ -1,7 +1,7 @@
 // camera, renderer
 export default class Screen{
 	constructor(level){
-	// må godt gøres mere dynamisk
+	// skifter hvilken skærm der er fullscreen.
 	this.viewMode = 1;
 	
 	let mapScale = 75;

@@ -1,5 +1,5 @@
 export default class Visitor{
-	constructor(scene){
+	constructor(scene,level){
 		
 		this.body = new THREE.Object3D();
 		
@@ -8,10 +8,9 @@ export default class Visitor{
 		this.body.position.z = 0.5;
 		this.body.rotation.y = -Math.PI/2;
 		
-		// midlertidig til test . skift etaga
+		// skift etage (til test)
 		this.groundFloor = true;
 	
-
 		this.moveSpeed = 0.15;
 		this.rotationSpeed = 3 * (Math.PI/180);	//degrees per frame
 
@@ -37,7 +36,6 @@ export default class Visitor{
 			this.visitorModel.position.y = 0.25;
 		}
 	}
-	
 	update(level, camera_FP){
 
 		this.body.rotation.y += this.turnDirection * this.rotationSpeed;
@@ -67,9 +65,8 @@ export default class Visitor{
 		camera_FP.position.z = this.body.position.z;
 		camera_FP.position.x = this.body.position.x;
 		camera_FP.position.y = this.body.position.y;
-		
+	
 		camera_FP.rotation.y = this.body.rotation.y;
-
 	}
 	updatePosition(e,camera_FP){
 	// https://github.com/mrdoob/three.js/blob/master/examples/jsm/controls/PointerLockControls.js

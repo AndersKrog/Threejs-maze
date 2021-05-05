@@ -6,10 +6,13 @@ export default class Level{
 		this.grid_floor0;
 		this.floor0_walls = new THREE.Group();
 		this.grid_floor1;
+		
+		// floor_height? 3.5?
+		
     }
 	
-	load_txt_file(htmltag,file_name){
-		// indlæser data fra txt.fil og returnerer et 2dimensionelt array med de enkelte karakterer
+	load_txt_file(file_name){
+		// indlæser data fra txt.fil
 		var request = new XMLHttpRequest();
 		request.open('GET', file_name, false);  // 'false' gør kaldet synkront
 		request.send(null);
@@ -53,42 +56,156 @@ export default class Level{
 		const heightMap = loader.load('assets/noise.jpg');
 		const linoleum = loader.load('assets/linoleum.jpg');
 		const ceiling = loader.load('assets/ceiling.jpg');
-		const ceiling1 = loader.load('assets/ceiling.jpg');
 		const wall = loader.load('assets/wall.png');
 		const windowwall = loader.load('assets/windowwall.png');
 		
-		for (let row = 0; row < grid_floor.length; row++){
-			for (let column = 0; column < grid_floor[row].length; column++){
-				switch(grid_floor[row][column]){
+		// bruges til at holde styr på hvad der er indlæst i arrayet og hvad der ikke er.
+		var array_temp = grid_floor.slice();
+		
+		for (let row = 0; row < array_temp.length; row++){
+			// så den kun skal findes en gang
+			let col_length = array_temp.length
+			for (let column = 0; column < array_temp[row].length; column++){
+				// så den kun skal findes en gang per kolone
+				let row_length = array_temp[row].length;
+				// deklareret her af hensyn til scope:
+				let wall_height, wall_width, floor_height,floor_width;				
+		
+				switch(array_temp[row][column]){
+				case "X":
+					// elementet er behandlet
+					break;
 				case " ":
+					// her kunne man godt have indlæsning af gulv
+					
+					floor_height = 1;
+					floor_width = 1;
+					
+					floor_width = this.get_floor_width(array_temp,row_length, col_length, row,column,"1");
+					// kig OGSÅ ned i array
+					
+					// lav gulv
+					var geometry_floor = new THREE.BoxGeometry(floor_width*this.TILESIZE, this.TILESIZE, floor_height*this.TILESIZE);
+
+					linoleum.wrapS = THREE.RepeatWrapping;
+					linoleum.wrapT = THREE.RepeatWrapping;
+					//linoleum.repeat.set(5,5);
+					linoleum.repeat.set(floor_width,floor_height);
+					var material_floor = new THREE.MeshStandardMaterial({map: linoleum});
+					var mesh_floor = new THREE.Mesh(geometry_floor,material_floor);
+					mesh_floor.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*floor_width; 
+					mesh_floor.position.y = -1.5 + floor_number*3.5;
+					mesh_floor.position.z = row*this.TILESIZE + 0.5*this.TILESIZE * floor_height;
+					scene.add(mesh_floor);
+
+					// lav loft
+					var geometry_roof = new THREE.BoxGeometry(floor_width*this.TILESIZE, this.TILESIZE, floor_height*this.TILESIZE);
+					ceiling.wrapS = THREE.RepeatWrapping;
+					ceiling.wrapT = THREE.RepeatWrapping;
+					ceiling.repeat.set(floor_width,floor_height);
+					//ceiling.repeat.set(1,1);
+
+					var material_roof = new THREE.MeshStandardMaterial({ map: ceiling});
+					var mesh_roof = new THREE.Mesh(geometry_roof,material_roof);
+					mesh_roof.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*floor_width; 
+					mesh_roof.position.y = 5*this.TILESIZE -1 + floor_number* 3.5;
+					mesh_roof.position.z = row*this.TILESIZE + 0.5*this.TILESIZE * floor_height;
+					scene.add(mesh_roof);
+					
+					break;
+				case "0":
+					// huller i gulvet
+					
+					floor_height = 1;
+					floor_width = 1;
+					
+					floor_width = this.get_floor_width(array_temp,row_length, col_length, row,column,"1");
+					// kig OGSÅ ned i array
+					
+					
+					if (floor_number == 0){
+						// lav gulv
+						var geometry_floor = new THREE.BoxGeometry(floor_width*this.TILESIZE, this.TILESIZE, floor_height*this.TILESIZE);
+
+						linoleum.wrapS = THREE.RepeatWrapping;
+						linoleum.wrapT = THREE.RepeatWrapping;
+						//linoleum.repeat.set(5,5);
+						linoleum.repeat.set(floor_width,floor_height);
+						var material_floor = new THREE.MeshStandardMaterial({map: linoleum});
+						var mesh_floor = new THREE.Mesh(geometry_floor,material_floor);
+						mesh_floor.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*floor_width; 
+						mesh_floor.position.y = -1.5 + floor_number*3.5;
+						mesh_floor.position.z = row*this.TILESIZE + 0.5*this.TILESIZE * floor_height;
+						scene.add(mesh_floor);
+					} else{
+					// lav loft
+					var geometry_roof = new THREE.BoxGeometry(floor_width*this.TILESIZE, this.TILESIZE, floor_height*this.TILESIZE);
+					ceiling.wrapS = THREE.RepeatWrapping;
+					ceiling.wrapT = THREE.RepeatWrapping;
+					ceiling.repeat.set(floor_width,floor_height);
+					//ceiling.repeat.set(1,1);
+
+					var material_roof = new THREE.MeshStandardMaterial({ map: ceiling});
+					var mesh_roof = new THREE.Mesh(geometry_roof,material_roof);
+					mesh_roof.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*floor_width; 
+					mesh_roof.position.y = 5*this.TILESIZE -1 + floor_number* 3.5;
+					mesh_roof.position.z = row*this.TILESIZE + 0.5*this.TILESIZE * floor_height;
+					scene.add(mesh_roof);
+					}
 					break;
 				case "1":
-					var geometry = new THREE.BoxGeometry(this.TILESIZE,this.TILESIZE*5,this.TILESIZE);
+					// marker det første felt som læst
+					array_temp[row][column] = "X";
+
+					wall_height = 1;
+					wall_width = 1;
+					// tjek om der er en lignende væg nedenunder eller til højre
+					
+					wall_height = this.get_wall_height(array_temp,row_length, col_length, row,column,"1");
+					
+					if (wall_height == 1){
+						wall_width = this.get_wall_width(array_temp,row_length, col_length,row,column,"1");
+					}
+				
+					var geometry = new THREE.BoxGeometry(wall_width * this.TILESIZE,this.TILESIZE*5,wall_height * this.TILESIZE);
 					var material = new THREE.MeshStandardMaterial({ map: wall});
 					var mesh = new THREE.Mesh(geometry,material);
-					mesh.position.x = column*this.TILESIZE + 0.5*this.TILESIZE; 
+					mesh.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*wall_width; 
 					mesh.position.y = floor_number*3.5;
-					mesh.position.z = row*this.TILESIZE + 0.5*this.TILESIZE;
+					mesh.position.z = row*this.TILESIZE + 0.5*this.TILESIZE * wall_height;
 					this.floor0_walls.add(mesh);
 					scene.add(mesh);
 					break;
 				case "2":
-					var geometry = new THREE.BoxGeometry(this.TILESIZE,this.TILESIZE*2,this.TILESIZE);
+					// væg med vinduer, kan kun vende en vej pt.
+					array_temp[row][column] = "X";
+
+					wall_height = 1;
+					wall_width = 1;
+					// tjek om der er en lignende væg nedenunder eller til højre
+					
+					wall_height = this.get_wall_height(array_temp,row_length, col_length, row,column,"2");
+					
+					if (wall_height == 1){
+						wall_width = this.get_wall_width(array_temp,row_length, col_length,row,column,"2");
+					}
+				
+					var geometry = new THREE.BoxGeometry(wall_width * this.TILESIZE,this.TILESIZE*2,wall_height*this.TILESIZE);
 					var material = new THREE.MeshStandardMaterial({  map: windowwall});
 					var mesh = new THREE.Mesh(geometry,material);
-					mesh.position.x = column*this.TILESIZE + 0.5*this.TILESIZE; 
+					mesh.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*wall_width; 
 					mesh.position.y = floor_number*this.TILESIZE*7 -1.5*this.TILESIZE;
-					mesh.position.z = row*this.TILESIZE + 0.5*this.TILESIZE;
+					mesh.position.z = row*this.TILESIZE + 0.5*this.TILESIZE*wall_height;
 					scene.add(mesh);
 
-					var geometryw = new THREE.BoxGeometry(this.TILESIZE,this.TILESIZE*3,this.TILESIZE/8);
+					var geometryw = new THREE.BoxGeometry(this.TILESIZE*wall_width,this.TILESIZE*3,this.TILESIZE/32);
 					var materialw = new THREE.MeshPhysicalMaterial({ color: 0x0033FF});
 					materialw.transparent = true;
 					materialw.opacity = 0.2;
 					var meshw = new THREE.Mesh(geometryw,materialw);
-					meshw.position.x = column*this.TILESIZE + 0.5*this.TILESIZE; 
+					meshw.position.x = column*this.TILESIZE + 0.5*this.TILESIZE*wall_width; 
 					meshw.position.y = floor_number*this.TILESIZE*7 + this.TILESIZE;
-					meshw.position.z = row*this.TILESIZE + 0.5*this.TILESIZE;
+					meshw.position.z = row*this.TILESIZE + 0.5*this.TILESIZE*wall_height;
 					scene.add(meshw);
 					break;
 				case "L":
@@ -107,43 +224,96 @@ export default class Level{
 			}
 		}
 	}
-	
+	get_wall_width(array_temp,row_length,col_length,row,column,key){
+		let wall_width = 1;
+										
+		// kig mod højre
+		if ((column+1 < row_length) && (array_temp[row][column+1] == key)){
+		// tjek til højre indtil, der ikke længere er samme væg
+			while ((column+wall_width < row_length) && (array_temp[row][column+wall_width] == key)){
+				array_temp[row][column+wall_width] = "X";
+				wall_width++;
+			}
+		}
+		return wall_width;
+	}
+	get_wall_height(array_temp,row_length,col_length, row,column,key){
+		let wall_height = 1;
+
+		if ((row+1 < col_length) && (array_temp[row+1][column] == "1")){
+		// tjek ned indtil, der ikke længere er samme væg
+			while ((row+wall_height < col_length) && (array_temp[row+wall_height][column] == key)){
+
+				// følgende er for at få de vandrette vægge til at være de primære. Det ser pænere ud.
+				// der er vist vægge der overlapper pga. dette
+				// det kan gøres endnu smartere fx hvis der er vægge ved siden af hinanden eller krydser.
+		
+				// kig til siderne
+				if ((column+1 >= row_length) && (array_temp[row+wall_height][column+1]) != key){
+					if ((column-1 <= 0) && (array_temp[row+wall_height][column-1] != key)){
+						array_temp[row+wall_height][column] = "X";
+						wall_height++;
+					} 
+				}else{
+					wall_height++;
+					// er ikke så vild med break, så det er en midlertidig løsning
+					return wall_height;
+					break;	
+				}
+			}
+		}
+		return wall_height;
+	}
+	get_floor_width(array_temp,row_length,col_length,row,column,key){
+	let floor_width = 1;
+		// kig mod højre i array
+		if ((column+1 < row_length) && (array_temp[row][column+1] == " ")){
+		// tjek til højre indtil, der ikke længere er samme væg
+			while ((column+floor_width < row_length) && (array_temp[row][column+floor_width] == " ")){
+				array_temp[row][column+floor_width] = "X";
+				floor_width++;
+			}
+		}
+		return floor_width;
+	}
+
+	get_floor_height(array_temp,row_length,col_length, row,column,key){
+/*
+		//mangler 
+
+			if ((row+1 < col_length) && (array_temp[row+1][column] != "1")){
+				// tjek ned indtil, der ikke længere er samme væg
+						while ((row+floor_height < col_length) && (array_temp[row+floor_height][column] != "1")){
+							// men tjek at hver linje er så lang som floor_width fundet op over.
+							let floor_check = 0;
+							while ((column+floor_check < row_length) && (array_temp[row+floor_height][column+floor_check] != "1")){
+								//array_temp[row+floor_height][column+floor_check] = "X";
+								floor_check++;
+							}
+							if (floor_check == floor_width){
+								floor_height++;								
+							}
+						}
+					}
+*/
+	}
+
 	generate(scene){
 
 		//indlæs levelfiler
-		this.grid_floor0 = this.load_txt_file('floor0','assets/floor0.txt');
-		this.grid_floor1 = this.load_txt_file('floor1','assets/floor1.txt');
+		this.grid_floor0 = this.load_txt_file('assets/floor0.txt');
+		this.grid_floor1 = this.load_txt_file('assets/floor1.txt');
 
 		// load textures
 		const loader = new THREE.TextureLoader();
 		const heightMap = loader.load('assets/noise.jpg');
 		const linoleum = loader.load('assets/linoleum.jpg');
 		const ceiling = loader.load('assets/ceiling.jpg');
-		const ceiling1 = loader.load('assets/ceiling.jpg');
 		const wall = loader.load('assets/wall.png');
 		const windowwall = loader.load('assets/windowwall.png');
 		
 		this.arr_to_floor(scene,this.grid_floor0,0);
 		this.arr_to_floor(scene,this.grid_floor1,1);
-
-		// floor
-		var geometryf = new THREE.BoxGeometry(this.map_width*this.TILESIZE,0.5,this.map_height*this.TILESIZE);
-
-		linoleum.wrapS = THREE.RepeatWrapping;
-		linoleum.wrapT = THREE.RepeatWrapping;
-		linoleum.repeat.set(30,30);
-		var materialf = new THREE.MeshStandardMaterial({map: linoleum});
-		var meshf = new THREE.Mesh(geometryf,materialf);
-		meshf.position.x = this.TILESIZE * this.map_width/2; 
-		meshf.position.y = -1.5;
-		meshf.position.z = this.TILESIZE * this.map_height/2;
-		scene.add(meshf);
-
-		var meshf2 = new THREE.Mesh(geometryf,materialf);
-		meshf2.position.x = this.TILESIZE * this.map_width/2; 
-		meshf2.position.y = -1.25 + 3.25;
-		meshf2.position.z = this.TILESIZE * this.map_height/2;
-		scene.add(meshf2);
 
 		// grass
 		var geometryg = new THREE.PlaneBufferGeometry(this.map_width*2,this.map_height*2,32,32);			//(this.map_width,1,this.map_height);
@@ -154,24 +324,6 @@ export default class Level{
 		meshg.position.y = -4;
 		meshg.position.z = this.TILESIZE *  this.map_height/2;
 		scene.add(meshg);
-
-		// ceiling
-		var geometryr = new THREE.BoxGeometry(this.map_width*this.TILESIZE,0.5,this.map_height*this.TILESIZE);
-		ceiling.wrapS = THREE.RepeatWrapping;
-		ceiling.wrapT = THREE.RepeatWrapping;
-		ceiling.repeat.set(25,15);
-		var materialr = new THREE.MeshStandardMaterial({ map: ceiling});
-		var meshr = new THREE.Mesh(geometryr,materialr);
-		meshr.position.x = this.TILESIZE * this.map_width/2; 
-		meshr.position.y = 5*this.TILESIZE -1;
-		meshr.position.z = this.TILESIZE * this.map_height/2;
-		scene.add(meshr);
-		
-		var meshr2 = new THREE.Mesh(geometryr,materialr);
-		meshr2.position.x = this.TILESIZE * this.map_width/2; 
-		meshr2.position.y = 5*this.TILESIZE -0.75 + 3.25;
-		meshr2.position.z = this.TILESIZE * this.map_height/2;
-		scene.add(meshr2);
 
 		const alight = new THREE.AmbientLight( 0x404040 ); // soft white light
 		alight.intensity = 0.4;
@@ -216,6 +368,16 @@ export default class Level{
             Mesh.position.z = 12;
 			Mesh.rotation.y = Math.PI;
         });
-		
+	
+		// himmel: Giver fejlbesked når den ikke ligger i hovedscriptet, men virker
+		//const loader = new THREE.TextureLoader();
+		const bg = loader.load(
+		'assets/sky.jpg',
+		() => {
+		const rt = new THREE.WebGLCubeRenderTarget(bg.image.height);
+		rt.fromEquirectangularTexture(screen.renderer,bg);
+		rt.fromEquirectangularTexture(screen.renderer2,bg);
+		scene.background = rt.texture;
+		});
 	}
 }

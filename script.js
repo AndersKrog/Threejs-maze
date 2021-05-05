@@ -15,33 +15,13 @@ let inputHandler = new InputHandler(visitor,screen);
 // ur - kan fx bruges til animation eller til at nulstille program
 let time = new THREE.Clock();
 
-// himmel
-const loader = new THREE.TextureLoader();
-const bg = loader.load(
-'assets/sky.jpg',
-() => {
-const rt = new THREE.WebGLCubeRenderTarget(bg.image.height);
-rt.fromEquirectangularTexture(screen.renderer,bg);
-rt.fromEquirectangularTexture(screen.renderer2,bg);
-scene.background = rt.texture;
-});
-
 level.generate(scene);
 
 time.start();
+
 // gameloop
-
-
-// virker ikke!!
-level.floor0_walls.matrix.scale(new THREE.Vector3(.2,.20,.1));	
-level.floor0_walls.updateMatrix();
-
-
 function loop(){
 	requestAnimationFrame(loop);
-	
-	
-	
 	
 	//console.log(time.getElapsedTime ());
 
@@ -54,7 +34,5 @@ function loop(){
 		screen.renderer.render(scene,screen.camera_Top);
 		screen.renderer2.render(scene,screen.camera_FP);		
 	}
-	
 }	
-
 loop();

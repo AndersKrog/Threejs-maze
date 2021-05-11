@@ -5,7 +5,7 @@ export default class Screen{
 	this.viewMode = 1;
 	
 	let mapScale = 75;
-	this.camera_FP = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+	this.camera_FP = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.0001,1000);
 	this.camera_Top = new THREE.OrthographicCamera(window.innerWidth/ -mapScale,window.innerWidth/ mapScale, window.innerHeight/mapScale,window.innerHeight/-mapScale, 1,1000);
 
 	this.renderer = new THREE.WebGLRenderer({ canvas: canvasGL, antialias: true});

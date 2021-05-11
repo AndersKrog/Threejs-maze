@@ -3,9 +3,9 @@ export default class Visitor{
 		
 		this.body = new THREE.Object3D();
 		
-		this.body.position.x = 5;
+		this.body.position.x = 7;
 		this.body.position.y = 0.25;
-		this.body.position.z = 0.5;
+		this.body.position.z = 3;
 		this.body.rotation.y = -Math.PI/2;
 		
 		// skift etage (til test)
@@ -31,8 +31,8 @@ export default class Visitor{
 			this.body.position.y = 3.75;
 			this.visitorModel.position.y = 3.75;
 		} else{
-			this.body.position.y = 0.25;
 			this.groundFloor = true;
+			this.body.position.y = 0.25;
 			this.visitorModel.position.y = 0.25;
 		}
 	}
@@ -47,16 +47,12 @@ export default class Visitor{
 
 		// Det ville give mening hvis kameraet er lidt bagved spilleren, afhængigt af spillerens rotation, så man ikke kommer til at kunne se gennem vægge.
 
-		/*
-		// hitdetection
-		if (level.hasWallAt(newX,newZ) == 0 ){	
+		// hitdetection	
+		if (level.hasWallAt(this.groundFloor,newX,newZ) != 1 ){	
 			this.body.position.z = newZ;
 			this.body.position.x = newX;
 		}
-		*/
-		this.body.position.z = newZ;
-		this.body.position.x = newX;
-		
+			
 		this.visitorModel.position.x = this.body.position.x;
 		this.visitorModel.position.z = this.body.position.z;
 

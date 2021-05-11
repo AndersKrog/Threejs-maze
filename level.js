@@ -40,14 +40,20 @@ export default class Level{
 
 		return array_tmp;
 	}
-	hasWallAt(x,z){
+	hasWallAt(groundfloor, x,z){
 		// virker ikke pt.
 		// der skal tages højde for, hvilken etage man er på. og hvad man kan gå igennem
-		if (x < 0 || x > this.map_width || z < 0 || z > this.map_height){
-			return true;
+		var mapGridIndexZ = Math.floor(x/this.TILESIZE);
+		var mapGridIndexX = Math.floor(z/this.TILESIZE);
+
+		if (x > 0 || x < this.map_width || z > 0 || z < this.map_height){
+			if (groundfloor){
+				return this.grid_floor0[mapGridIndexX][mapGridIndexZ]
+			} else{
+				return this.grid_floor1[mapGridIndexX][mapGridIndexZ]
+			}
 		}
-		var mapGridIndexX = Math.floor(x/this.TILESIZE);
-		var mapGridIndexZ = Math.floor(z/this.TILESIZE);
+
 	}
 	
 	arr_to_floor(scene,grid_floor,floor_number){
@@ -59,9 +65,18 @@ export default class Level{
 		const wall = loader.load('assets/wall.png');
 		const windowwall = loader.load('assets/windowwall.png');
 		
-		// bruges til at holde styr på hvad der er indlæst i arrayet og hvad der ikke er.
-		var array_temp = grid_floor.slice();
 		
+		// kopier array.
+		let array_temp = [];
+		for (let row = 0; row < grid_floor.length; row++){
+			let rowarr = []
+			for (let column = 0; column < grid_floor[row].length; column++){
+				let item = grid_floor[row][column];
+				rowarr.push(item);
+			}
+			array_temp.push(rowarr);
+		}
+
 		for (let row = 0; row < array_temp.length; row++){
 			// så den kun skal findes en gang
 			let col_length = array_temp.length
@@ -303,6 +318,8 @@ export default class Level{
 		//indlæs levelfiler
 		this.grid_floor0 = this.load_txt_file('assets/floor0.txt');
 		this.grid_floor1 = this.load_txt_file('assets/floor1.txt');
+
+		//console.log(this.grid_floor0);
 
 		// load textures
 		const loader = new THREE.TextureLoader();

@@ -23,8 +23,6 @@ time.start();
 function loop(){
 	requestAnimationFrame(loop);
 	
-	//console.log(time.getElapsedTime ());
-
 	visitor.update(level,screen.camera_FP);
 	
 	if (screen.viewMode == 1) {
